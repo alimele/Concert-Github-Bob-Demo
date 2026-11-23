@@ -6,8 +6,7 @@ on:
 
 jobs:
   trigger-remediation:
-    # Only run for Concert-created tickets, not every issue opened in the repo
-    if: contains(github.event.issue.title, '[From: IBM Concert]')
+    if: "contains(github.event.issue.title, '[From: IBM Concert]')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
