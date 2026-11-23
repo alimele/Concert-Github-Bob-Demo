@@ -11,7 +11,7 @@ on:
 
 jobs:
   trigger-remediation:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.issue.title, '[From: IBM Concert]')
+    if: "github.event_name == 'workflow_dispatch' || contains(github.event.issue.title, '[From: IBM Concert]')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
