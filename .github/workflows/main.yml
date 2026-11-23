@@ -3,32 +3,36 @@ name: Bob-shell CVE Remediation
 on:
   issues:
     types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to remediate
+        required: true
 
 jobs:
   trigger-remediation:
-    if: "contains(github.event.issue.title, '[From: IBM Concert]')"
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.issue.title, '[From: IBM Concert]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write
       pull-requests: write
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Install Bob Shell
         run: curl -fsSL https://bob.ibm.com/download/bobshell.sh | bash
 
-      - name: Accept license
-        env:
-          BOBSHELL_API_KEY: ${{ secrets.BOBSHELL_API_KEY }}
-        run: bob --accept-license
-
       - name: Run Bob Shell on the issue
         env:
           BOBSHELL_API_KEY: ${{ secrets.BOBSHELL_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
         run: |
           bob --version
-          PROMPT="Review GitHub issue #${{ github.event.issue.number }} in this repository, titled: ${{ github.event.issue.title }}. This issue reports a CVE finding. Research the CVE, identify the affected package and the safe fixed version, update the dependency, verify the project still builds, and open a pull request with the fix referencing issue #${{ github.event.issue.number }}."
-          bob --auth-method api-key -p "$PROMPT" || bob -p "$PROMPT"
+          PROMPT="Read GitHub issue #${ISSUE_NUMBER} in this repository using the gh CLI. It reports a CVE finding. Research the CVE, identify the affected package and the safe fixed version, update the dependency, verify the project still builds and tests pass, create a branch, and open a pull request with the fix that references issue #${ISSUE_NUMBER}."
+          bob --auth-method api-key --yolo -p "$PROMPT"
