@@ -26,11 +26,6 @@ jobs:
 
       - name: Install Bob Shell
         run: curl -fsSL https://bob.ibm.com/download/bobshell.sh | bash -s -- --pm npm
-        
-      - name: Show Bob CLI help
-        run: |
-          bob --help
-          bob run --help
 
       - name: Run Bob Shell on the issue
         env:
@@ -40,4 +35,4 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
         run: |
           PROMPT="Read GitHub issue #${ISSUE_NUMBER} in this repository using the gh CLI. It reports a CVE finding. Research the CVE, identify the affected package and the safe fixed version, update the dependency, verify the project still builds and tests pass, create a branch, and open a pull request with the fix that references issue #${ISSUE_NUMBER}."
-          bob run "$PROMPT"
+          bob run --accept-license --trust --max-turns 40 --log-level info "$PROMPT"
